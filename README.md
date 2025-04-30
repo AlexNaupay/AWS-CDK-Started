@@ -28,5 +28,15 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 # Help
 cdk --help
 cdk deploy --help
-
 ```
+
+## Steps
+```bash
+cdk bootstrap
+cdk synth
+cdk diff
+cdk deploy
+cdk destroy
+```
+## Resources
+[AWS SDK v3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/introduction/)

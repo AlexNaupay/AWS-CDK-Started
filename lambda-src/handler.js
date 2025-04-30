@@ -1,13 +1,13 @@
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const crypto = require("crypto");
 
-const dynamo = new AWS.DynamoDB.DocumentClient();
+const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-const TABLE_NAME = process.env.USERS_TABLE_NAME  // Get the table name from environment variable
+const TABLE_NAME = process.env.USERS_TABLE_NAME  // Get the table name from the environment variable
 
-exports.save = async (event) => {
+exports.save = async (body) => {
     // event.queryStringParameters is an object containing query string parameters
-    const body = JSON.parse(event.body);  // Parse the body to JSON
     const uuid = crypto.randomUUID();  // Generate a random UUID
 
     const user = {
@@ -34,9 +34,8 @@ async function saveUser(user) {
 
     console.info(params)
 
-    return dynamo.put(params)
-        .promise().then((response) => {
-            console.info(response);
-            return user;
-        });
+    const response = await dynamo.send(new PutCommand(params));
+    console.info("DynamoDB Response:", response);
+
+    return user;
 }

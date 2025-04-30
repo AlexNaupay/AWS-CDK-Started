@@ -4,6 +4,7 @@ import {Construct} from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as dynamo from 'aws-cdk-lib/aws-dynamodb'
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway'
+import * as iam from 'aws-cdk-lib/aws-iam'
 
 const TABLE_NAME = 'Users'
 
@@ -28,7 +29,17 @@ export class AwsCdkStartedStack extends Stack {
                 USERS_TABLE_NAME: TABLE_NAME,
             }
         })
+
+        //dynamoUsersTable.grantFullAccess(saveUsersLambda)
         dynamoUsersTable.grantReadWriteData(saveUsersLambda)  // Give permissions to lambda to read and write
+        //props?.downstream.grantInvoke(saveUsersLambda)
+        /*saveUsersLambda.addToRolePolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ['dynamodb:PutItem'],
+                resources: [dynamoUsersTable.tableArn]
+            })
+        )*/
 
         // L2: API Gateway
         const usersApiGateway = new apiGateway.RestApi(this, 'UsersApiGateway')
