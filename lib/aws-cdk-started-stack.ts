@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import {Duration, Stack, StackProps, CfnOutput} from 'aws-cdk-lib';
+import {Duration, Stack, StackProps, CfnOutput, CfnParameter} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as dynamo from 'aws-cdk-lib/aws-dynamodb'
@@ -11,6 +11,12 @@ import * as process from "node:process";
 export class AwsCdkStartedStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
+
+        const myCloudFormationParameter = new CfnParameter(this, 'MyCloudFormationParameter', {
+            type: 'String',
+            description: 'My first CloudFormation parameter',
+            default: 'My default value for myCloudFormationParameter',
+        });
 
         // L2: DynamoDb Table
         const dynamoUsersTable = new dynamo.Table(this, 'Users', {

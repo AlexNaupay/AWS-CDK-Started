@@ -36,6 +36,8 @@ cdk bootstrap
 cdk synth
 cdk diff
 cdk deploy
+cdk deploy --parameters MyCloudFormationParameter="Value for parameter"   # Parameters
+cdk deploy --context env=dev  # context
 cdk destroy
 ```
 ## Resources
