@@ -6,7 +6,11 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 const TABLE_NAME = process.env.USERS_TABLE_NAME  // Get the table name from the environment variable
 
-exports.save = async (body) => {
+exports.save = async (event) => {
+    console.info("----------- Starting to save user -----------");
+    console.log(event);
+    console.info(`typeof event.body: ${typeof event.body}`);
+    const body = (typeof event.body === 'string')?JSON.parse(event.body) : event.body;
     // event.queryStringParameters is an object containing query string parameters
     const uuid = crypto.randomUUID();  // Generate a random UUID
 

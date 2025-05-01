@@ -1,19 +1,18 @@
 import * as path from "node:path";
-import {Duration, Stack, StackProps} from 'aws-cdk-lib';
+import {Duration, Stack, StackProps, CfnOutput} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as dynamo from 'aws-cdk-lib/aws-dynamodb'
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway'
 import * as iam from 'aws-cdk-lib/aws-iam'
 
-const TABLE_NAME = 'Users'
-
 export class AwsCdkStartedStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
         // L2: DynamoDb Table
-        const dynamoUsersTable = new dynamo.Table(this, TABLE_NAME, {
+        const dynamoUsersTable = new dynamo.Table(this, 'Users', {
+            tableName: 'Users', // Explicitly naming the table
             partitionKey: {
                 name: 'id',
                 type: dynamo.AttributeType.STRING
@@ -26,7 +25,7 @@ export class AwsCdkStartedStack extends Stack {
             handler: 'handler.save',
             code: lambda.Code.fromAsset(path.resolve(__dirname, '..', 'lambda-src')),
             environment: {
-                USERS_TABLE_NAME: TABLE_NAME,
+                USERS_TABLE_NAME: dynamoUsersTable.tableName,
             }
         })
 
@@ -46,5 +45,18 @@ export class AwsCdkStartedStack extends Stack {
         usersApiGateway.root
             .resourceForPath('users')
             .addMethod('POST', new apiGateway.LambdaIntegration(saveUsersLambda))
+
+
+        // Output the API Gateway URL
+        new CfnOutput(this, 'ApiEndpoint', {
+            value: usersApiGateway.url,
+            description: 'API Gateway endpoint URL',
+        });
+
+        // Output the DynamoDB Table name
+        new CfnOutput(this, 'DynamoDBTableName', {
+            value: dynamoUsersTable.tableName,
+            description: 'DynamoDB Table Name',
+        });
     }
 }
