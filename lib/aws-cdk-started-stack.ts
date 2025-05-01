@@ -23,7 +23,16 @@ export class AwsCdkStartedStack extends Stack {
         const saveUsersLambda = new lambda.Function(this, 'SaveUsersLambda', {
             runtime: lambda.Runtime.NODEJS_22_X,
             handler: 'handler.save',
-            code: lambda.Code.fromAsset(path.resolve(__dirname, '..', 'lambda-src')),
+            code: lambda.Code.fromAsset(path.resolve(__dirname, '..', 'lambda-src/save')),
+            environment: {
+                USERS_TABLE_NAME: dynamoUsersTable.tableName,
+            }
+        })
+
+        const listUsersLambda = new lambda.Function(this, 'ListUsersLambda', {
+            runtime: lambda.Runtime.NODEJS_22_X,
+            handler: 'handler.list',
+            code: lambda.Code.fromAsset(path.resolve(__dirname,'../lambda-src/list')),
             environment: {
                 USERS_TABLE_NAME: dynamoUsersTable.tableName,
             }
@@ -31,6 +40,7 @@ export class AwsCdkStartedStack extends Stack {
 
         //dynamoUsersTable.grantFullAccess(saveUsersLambda)
         dynamoUsersTable.grantReadWriteData(saveUsersLambda)  // Give permissions to lambda to read and write
+        dynamoUsersTable.grantReadData(listUsersLambda)
         //props?.downstream.grantInvoke(saveUsersLambda)
         /*saveUsersLambda.addToRolePolicy(
             new iam.PolicyStatement({
@@ -46,6 +56,9 @@ export class AwsCdkStartedStack extends Stack {
             .resourceForPath('users')
             .addMethod('POST', new apiGateway.LambdaIntegration(saveUsersLambda))
 
+        usersApiGateway.root
+            .resourceForPath('users')
+            .addMethod('GET', new apiGateway.LambdaIntegration(listUsersLambda))
 
         // Output the API Gateway URL
         new CfnOutput(this, 'ApiEndpoint', {
